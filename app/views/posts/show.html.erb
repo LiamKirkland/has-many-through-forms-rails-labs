@@ -1,1 +1,31 @@
+<h1><%= @post.title %></h1>
+<h3>Categories: <%= @post.categories.reduce("") { |list, category| list.empty? ? category.name : list + ", " + category.name } %></h3>
+<p><%= @post.content %></p>
+<hr>
+<% @post.comments.each do |comment| %>
+  <%= render partial: 'comment', locals: {comment: comment} %>
+<% end %>
+<h4>Users on post: </h4>
+<ul>
+  <% @post.users.uniq.each do |user| %>
+    <li><%= link_to user.username, user_path(user) %></li>
+  <% end %>
+</ul>
+<h4>Add new comment: </h4>
+<%= form_with model: @comment, local: true do |f| %>
+  <%= f.label :user_id, 'Commenter: ' %>
+  <%= f.collection_select :user_id, User.all, :id, :username, include_blank: true %><br>
 
+  <%= f.fields_for :user, @comment.build_user do |user_fields| %>
+    <%= user_fields.label :username, 'Or type a new username: ' %>
+    <%= user_fields.text_field :username %>
+  <% end %>
+  <br>
+
+  <%= f.label :content %>
+  <%= f.text_area :content %><br>
+
+  <%= f.hidden_field :post_id, value: @post.id %>
+
+  <%= f.submit %>
+<% end %>
